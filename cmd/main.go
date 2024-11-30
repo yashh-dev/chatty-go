@@ -9,7 +9,7 @@ import (
 var version = "0.0.0"
 
 func main() {
-	server := &irc.IRCServer{}
+	server := irc.NewIRCServer()
 	if len(os.Args) < 2 {
 		fmt.Println(HELP)
 		os.Exit(0)

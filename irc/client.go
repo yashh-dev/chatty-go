@@ -1,6 +1,7 @@
 package irc
 
 import (
+	"bufio"
 	"fmt"
 	"net/url"
 	"os"
@@ -22,21 +23,32 @@ func Connect() {
 		os.Exit(1)
 	}
 
-	defer conn.Close()
+	go func() {
+		for {
+			_, message, err := conn.ReadMessage()
+			if err != nil {
+				fmt.Println(err)
+			}
 
-	// err = conn.WriteMessage(1, []byte("hello guys"))
-	// if err != nil {
-	// 	fmt.Fprint(os.Stderr, err.Error())
-	// 	os.Exit(1)
-	// }
+			fmt.Println(string(message))
+		}
+	}()
 
 	for {
-		message := []byte{}
-		_, err := fmt.Scanln(&message)
+
+		ioReader := bufio.NewReader(os.Stdin)
+		message, err := ioReader.ReadString('\n')
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
+			continue
 		}
-		err = conn.WriteMessage(1, message)
+
+		if len(message) < 1 {
+			continue
+		}
+
+		fmt.Printf("message entered: %v.\n", message)
+		err = conn.WriteMessage(1, []byte(message))
 		if err != nil {
 			fmt.Fprint(os.Stderr, err.Error())
 			os.Exit(1)
